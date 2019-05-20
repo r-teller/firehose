@@ -7,3 +7,9 @@ To get started
     - mkdir -r /etc/docker/configs
 -- cd /etc/docker/configs
 -- git clone https://github.com/r-teller/firehose.git
+
+1. Ingredients
+
+    - spaghetti
+    - marinara sauce
+    - salt
