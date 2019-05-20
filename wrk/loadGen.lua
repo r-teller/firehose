@@ -130,12 +130,10 @@ userAgents = non_empty_lines_from("lua_useragents.txt")
 
 function request()
     -- Cleanup WRK Values so that everything is fresh
-    -- wrk.scheme  = "http"
-    -- wrk.host    = "localhost"
-    -- wrk.port    = nil
     wrk.method  = "GET"
     wrk.path    = "/"
     wrk.headers = {}
+    wrk.headers['Host'] = wrk.host
     wrk.body    = nil
 
     local attack = false
@@ -194,9 +192,15 @@ function request()
     wrk.path = path
 
     requests = requests + 1
-    if log_level == 'debug' then
+    
+    if log_level == 'request' then
         print(wrk.method .. ' ' .. wrk.scheme .. '://' .. wrk.host .. wrk.path)
-
     end
     return wrk.format(nil,path)
+end
+
+function response(status, headers, body)
+    if log_level == 'response' then
+        print('('.. status .. ') ' .. wrk.method .. ' ' .. wrk.scheme .. '://' .. wrk.host .. wrk.path..'\r\n'..body)
+    end
 end
