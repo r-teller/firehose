@@ -1,0 +1,3 @@
+FROM 1vlad/wrk2-docker 
+
+COPY wrk/ /wrk/data/
